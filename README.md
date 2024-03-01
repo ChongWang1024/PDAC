@@ -3,5 +3,7 @@ This is the official implementation of the CVPR 2024 paper "Progressive Divide-a
 
 *Chong Wang, Lanqing Guo, Yufei Wang, Hao Cheng, Yi Yu, Bihan Wen*
 
+*Nanyang Technological University*
+
 ## Introduction
 
