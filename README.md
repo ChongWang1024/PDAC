@@ -6,4 +6,7 @@ This is the official implementation of the CVPR 2024 paper "Progressive Divide-a
 *Nanyang Technological University*
 
 ## Introduction
+![Intro](/assets/intro.png)
+
+![framework](/assets/framework.png)
 
