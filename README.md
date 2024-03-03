@@ -10,5 +10,5 @@ This is the official implementation of the CVPR 2024 paper "Progressive Divide-a
 
 ![framework](/assets/framework.png)
 
-We are organizing the code and will release soon.
+We are organizing the code and will update instruction soon.
 
