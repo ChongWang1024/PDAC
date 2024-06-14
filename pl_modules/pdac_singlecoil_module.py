@@ -3,11 +3,11 @@ from argparse import ArgumentParser
 import fastmri
 import torch
 from fastmri.data import transforms
-from models.humus_net_pdac import HUMUSNet_pdac
+from models.humus_net_pdac_singlecoil import HUMUSNet_pdac_singlecoil
 from pl_modules.mri_module import MriModule
 
 
-class PDACModule(MriModule):
+class PDACModule_singlecoil(MriModule):
 
     def __init__(
         self,
@@ -15,7 +15,7 @@ class PDACModule(MriModule):
         lr_step_size: int = 40,
         lr_gamma: float = 0.1,
         weight_decay: float = 0.0,
-        max_epoch: int = 50,
+        max_epoch: int = 40,
         num_adj_slices: int = 1,
         mask_center: bool = False,
         logger_type='tb',
@@ -50,7 +50,7 @@ class PDACModule(MriModule):
         self.lr_gamma = lr_gamma
         self.weight_decay = weight_decay
         self.max_epoch = max_epoch
-        self.model = HUMUSNet_pdac(**kwargs)
+        self.model = HUMUSNet_pdac_singlecoil(**kwargs)
         self.loss = torch.nn.L1Loss()
 
     
@@ -75,7 +75,7 @@ class PDACModule(MriModule):
 
         # calculate reference for probability according to the normailized column errors in k-space
         prob_ref_full = self.cal_interprob_ref_full(inter_out, kspace.unsqueeze(1))
-        prob_ref = prob_ref_full * inter_mask.squeeze(5).squeeze(3).squeeze(2)
+        prob_ref = prob_ref_full * inter_mask.squeeze()
 
         # crop to gt size
         target, output = transforms.center_crop_to_smallest(target, output)
@@ -143,10 +143,10 @@ class PDACModule(MriModule):
     def load_from_checkpoint(checkpoint_path):
         checkpoint = torch.load(checkpoint_path)
         hparams = checkpoint['hyper_parameters']
-        pdac_module = PDACModule(**hparams)
-        pdac_module.model = HUMUSNet_pdac.load_from_checkpoint(checkpoint_path)
+        pdac_module_singlecoil = PDACModule_singlecoil(**hparams)
+        pdac_module_singlecoil.model = HUMUSNet_pdac_singlecoil.load_from_checkpoint(checkpoint_path)
 
-        return pdac_module
+        return pdac_module_singlecoil
 
     @staticmethod
     def add_model_specific_args(parent_parser):  # pragma: no-cover

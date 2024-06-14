@@ -22,115 +22,11 @@ from pytorch_lightning.callbacks import LearningRateMonitor
 import tensorboardX
 
 
-def cli_main(args):
-    if args.verbose:
-        print(args.__dict__)
-        
-    pl.seed_everything(args.seed)
-    # ------------
-    # model
-    # ------------
-    model = PDACModule(
-        num_list=args.num_list,
-        num_cascades=args.num_cascades,
-        sens_pools=args.sens_pools,
-        sens_chans=args.sens_chans,
-        img_size=args.uniform_train_resolution,
-        patch_size=args.patch_size,
-        window_size=args.window_size,
-        embed_dim=args.embed_dim, 
-        depths=args.depths,
-        num_heads=args.num_heads,
-        mlp_ratio=args.mlp_ratio, 
-        bottleneck_depth=args.bottleneck_depth,
-        bottleneck_heads=args.bottleneck_heads,
-        resi_connection=args.resi_connection,
-        conv_downsample_first=args.conv_downsample_first,
-        num_adj_slices=args.num_adj_slices,
-        mask_center=(not args.no_center_masking),
-        use_checkpoint=args.use_checkpointing,
-        lr=args.lr,
-        lr_step_size=args.lr_step_size,
-        lr_gamma=args.lr_gamma,
-        weight_decay=args.weight_decay,
-        max_epoch=args.max_epochs,
-        logger_type=args.logger_type,
-    )
-    
-    # ------------
-    # data
-    # ------------
-    # this creates a k-space mask for transforming input data
-    mask = create_mask_for_mask_type(
-        args.mask_type, args.center_fractions, args.accelerations
-    )
-
-    # use random masks for train transform, fixed masks for val transform
-    train_transform = PDACDataTransform(uniform_train_resolution=args.uniform_train_resolution, mask_func=mask, use_seed=False)
-    val_transform = PDACDataTransform(uniform_train_resolution=args.uniform_train_resolution, mask_func=mask)
-    test_transform = PDACDataTransform(uniform_train_resolution=args.uniform_train_resolution)
-    
-    # ptl data module - this handles data loaders
-    data_module = StanfordDataModule(
-        data_path=args.data_path,
-        train_transform=train_transform,
-        val_transform=val_transform,
-        test_transform=test_transform,
-        test_path=args.test_path,
-        sample_rate=args.sample_rate,
-        volume_sample_rate=args.volume_sample_rate,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
-        distributed_sampler=(args.accelerator in ("ddp", "ddp_cpu", "gpu")),
-        train_val_seed=args.train_val_seed,
-        train_val_split=args.train_val_split,
-        num_adj_slices=args.num_adj_slices,
-    )
-
-    # ------------
-    # trainer
-    # ------------
-    # set up logger
-    if args.logger_type == 'tb':
-        logger = True
-    elif args.logger_type == 'wandb':
-        logger = pl.loggers.WandbLogger(project=args.experiment_name)
-    else:
-        raise ValueError('Unknown logger type.')
-    trainer = pl.Trainer.from_argparse_args(args, 
-                                            precision=16,
-                                            callbacks=[args.checkpoint_callback_ssim, 
-                                                       args.checkpoint_callback_psnr,
-                                                       args.learningrate_callback],
-                                            logger=logger)
-    
-    # Save all hyperparameters to .yaml file in the current log dir
-    if torch.distributed.is_available():
-        if torch.distributed.is_initialized():
-            if torch.distributed.get_rank() == 0:
-                save_all_hparams(trainer, args)
-    else: 
-         save_all_hparams(trainer, args)
-            
-    # ------------
-    # run
-    # ------------
-    trainer.fit(model, datamodule=data_module)
-
-def save_all_hparams(trainer, args):
-    if not os.path.exists(trainer.logger.log_dir):
-        os.makedirs(trainer.logger.log_dir)
-    save_dict = args.__dict__
-    save_dict.pop('checkpoint_callback')
-    with open(trainer.logger.log_dir + '/hparams.yaml', 'w') as f:
-        yaml.dump(save_dict, f)
-    
 def build_args():
     parser = ArgumentParser()
-
     # basic args
-    # backend = DDPStrategy(process_group_backend="nccl", find_unused_parameters=False)
-    backend = DDPStrategy(process_group_backend="gloo", find_unused_parameters=False)
+    # backend = DDPStrategy(process_group_backend="nccl", find_unused_parameters=False, static_graph=True)
+    backend = DDPStrategy(process_group_backend="gloo", find_unused_parameters=False, static_graph=True)
     num_gpus = 1
     batch_size = 1
 
@@ -155,7 +51,7 @@ def build_args():
     )
     parser.add_argument(
         '--experiment_name', 
-        default='humus-stanford-test',   
+        default='pdac-stanford',   
         type=str,          
         help='Used with wandb logger to define the project name.',
     )
@@ -245,6 +141,114 @@ def build_args():
     )
 
     return args
+
+
+def cli_main(args):
+    if args.verbose:
+        print(args.__dict__)
+        
+    pl.seed_everything(args.seed)
+    # ------------
+    # model
+    # ------------
+    model = PDACModule(
+        num_list=args.num_list,
+        num_cascades=args.num_cascades,
+        sens_pools=args.sens_pools,
+        sens_chans=args.sens_chans,
+        img_size=args.uniform_train_resolution,
+        patch_size=args.patch_size,
+        window_size=args.window_size,
+        embed_dim=args.embed_dim, 
+        depths=args.depths,
+        num_heads=args.num_heads,
+        mlp_ratio=args.mlp_ratio, 
+        bottleneck_depth=args.bottleneck_depth,
+        bottleneck_heads=args.bottleneck_heads,
+        resi_connection=args.resi_connection,
+        conv_downsample_first=args.conv_downsample_first,
+        num_adj_slices=args.num_adj_slices,
+        mask_center=(not args.no_center_masking),
+        use_checkpoint=args.use_checkpointing,
+        lr=args.lr,
+        lr_step_size=args.lr_step_size,
+        lr_gamma=args.lr_gamma,
+        weight_decay=args.weight_decay,
+        max_epoch=args.max_epochs,
+        logger_type=args.logger_type,
+    )
+    
+    # ------------
+    # data
+    # ------------
+    # this creates a k-space mask for transforming input data
+    mask = create_mask_for_mask_type(
+        args.mask_type, args.center_fractions, args.accelerations
+    )
+
+    # use random masks for train transform, fixed masks for val transform
+    train_transform = PDACDataTransform(uniform_train_resolution=args.uniform_train_resolution, mask_func=mask, use_seed=False)
+    val_transform = PDACDataTransform(uniform_train_resolution=args.uniform_train_resolution, mask_func=mask)
+    test_transform = PDACDataTransform(uniform_train_resolution=args.uniform_train_resolution)
+    
+    # ptl data module - this handles data loaders
+    data_module = StanfordDataModule(
+        data_path=args.data_path,
+        train_transform=train_transform,
+        val_transform=val_transform,
+        test_transform=test_transform,
+        test_path=args.test_path,
+        sample_rate=args.sample_rate,
+        volume_sample_rate=args.volume_sample_rate,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        distributed_sampler=(args.accelerator in ("ddp", "ddp_cpu", "gpu")),
+        train_val_seed=args.train_val_seed,
+        train_val_split=args.train_val_split,
+        num_adj_slices=args.num_adj_slices,
+    )
+
+    # ------------
+    # trainer
+    # ------------
+    # set up logger
+    if args.logger_type == 'tb':
+        logger = True
+    elif args.logger_type == 'wandb':
+        logger = pl.loggers.WandbLogger(project=args.experiment_name)
+    else:
+        raise ValueError('Unknown logger type.')
+    trainer = pl.Trainer.from_argparse_args(args, 
+                                            precision=16,
+                                            callbacks=[args.checkpoint_callback_ssim, 
+                                                       args.checkpoint_callback_psnr,
+                                                       args.learningrate_callback],
+                                            logger=logger,
+                                            resume_from_checkpoint=args.resume_from,
+                                            limit_train_batches=5,
+                                            limit_val_batches=5,
+                                            )
+    
+    # Save all hyperparameters to .yaml file in the current log dir
+    if torch.distributed.is_available():
+        if torch.distributed.is_initialized():
+            if torch.distributed.get_rank() == 0:
+                save_all_hparams(trainer, args)
+    else: 
+         save_all_hparams(trainer, args)
+            
+    # ------------
+    # run
+    # ------------
+    trainer.fit(model, datamodule=data_module)
+
+def save_all_hparams(trainer, args):
+    if not os.path.exists(trainer.logger.log_dir):
+        os.makedirs(trainer.logger.log_dir, exist_ok=True)
+    save_dict = args.__dict__
+    save_dict.pop('checkpoint_callback')
+    with open(trainer.logger.log_dir + '/hparams.yaml', 'w') as f:
+        yaml.dump(save_dict, f)
 
 
 def run_cli():

@@ -1,5 +1,5 @@
-data_path: /home/Dataset/fastMRI/stanford2d/
-default_root_dir: ./experiments/standford2d_pdac/
+data_path: /home/Dataset/fastMRI/
+default_root_dir: ./experiments/fastmri_pdac/multicoil
 resume_from: null
 
 gpus: 1
@@ -15,6 +15,7 @@ center_fractions:
 - 0.04
 challenge: multicoil
 check_val_every_n_epoch: 1
+combine_train_val: False
 mask_type: random
 
 # training setting
@@ -27,15 +28,12 @@ max_epochs: 50
 # model setting
 num_cascades: 8
 resume_from_checkpoint: null
-train_val_seed: 0
 seed: 42
 sens_chans: 16
 uniform_train_resolution:
 - 384
 - 384
-train_val_split: 0.8
 volume_sample_rate: 1.0
-weight_decay: 0.0
 embed_dim: 66
 patch_size: 1
 window_size: 8
