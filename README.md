@@ -31,7 +31,7 @@ conda install h5py
 
 ## Datasets
 ### fastMRI knee dataset
-The access for fastMRI could be applied at https://fastmri.med.nyu.edu/. You need to download the fastMRI knee dataset with the following files:
+The access for fastMRI dataset could be applied at https://fastmri.med.nyu.edu/. You need to download the fastMRI knee dataset with the following files:
 
 - knee_singlecoil_train.tar.gz
 - knee_singlecoil_val.tar.gz
@@ -57,7 +57,7 @@ After downloading the .h5 files the dataset has to be converted to a format comp
 ## Training
 To train a PDAC model from scratch, please follow the steps as follows
 
-1. Customize the .yaml file under `./pdac_examples/config/`
+1. Customize the `.yaml` file under `./pdac_examples/config/`
 
 ```
 data_path          # root directory containing fastMRI data
