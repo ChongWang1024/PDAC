@@ -69,7 +69,8 @@ num_list           # degradation budget schedule for pdac iterations
 ```
 # multi-coil data
 python pdac_examples/train_pdac_fastmri.py --config_file pdac_examples/config/fastmri/multicoil/pdac.yaml
-
+```
+```
 # single-coil data
 python pdac_examples/train_pdac_fastmri.py --config_file pdac_examples/config/fastmri/singlecoil/pdac.yaml
 ```
@@ -91,7 +92,8 @@ python pdac_examples/eval_pdac_fastmri.py \
 --center_fractions [0.04] \
 --checkpoint_file ./pretrained/pdac_fastmri_multicoil_8x
 --data_path DATA_DIR
-
+```
+```
 # single-coil data
 python pdac_examples/eval_pdac_fastmri.py \
 --challenge singlecoil \
