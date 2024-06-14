@@ -14,11 +14,19 @@ This is the official implementation of the CVPR 2024 highlight paper
 </p>
 
 ## Installation
-The code is implemented with Python 3.8.19 and PyTorch 2.3.1. Install the conda environment by
+The code is implemented with Python 3.8 and PyTorch 2.3.1. Create the conda environment by
 ```
 git clone https://github.com/ChongWang1024/PDAC.git
 cd PDAC
-pip install -r requirements.txt
+conda create -n pdac python==3.8
+conda activate pdac
+```
+Install the dependencies (**Note:** `h5py` should be installed using `conda` to avoid memory leakage issue)
+```
+pip install fastmri==0.1.1
+pip install pytorch-lightning==1.9.4
+pip install numpy timm einops PyYAML tensorboardX
+conda install h5py
 ```
 
 ## Datasets
