@@ -88,8 +88,8 @@ Please download the corresponding [pretrained models](https://drive.google.com/d
 # multi-coil data
 python pdac_examples/eval_pdac_fastmri.py \
 --challenge multicoil \
---acceleration [8] \
---center_fractions [0.04] \
+--accelerations 8 \
+--center_fractions 0.04 \
 --checkpoint_file ./pretrained/pdac_fastmri_multicoil_8x
 --data_path DATA_DIR
 ```
@@ -97,8 +97,8 @@ python pdac_examples/eval_pdac_fastmri.py \
 # single-coil data
 python pdac_examples/eval_pdac_fastmri.py \
 --challenge singlecoil \
---acceleration [8] \
---center_fractions [0.04] \
+--accelerations 8 \
+--center_fractions 0.04 \
 --checkpoint_file ./pretrained/pdac_fastmri_singlecoil_8x
 --data_path DATA_DIR
 ```
@@ -109,8 +109,8 @@ python pdac_examples/eval_pdac_fastmri.py \
 ```
 python pdac_examples/eval_pdac_stanford.py \
 --challenge multicoil \
---acceleration [8] \
---center_fractions [0.04] \
+--accelerations 8 \
+--center_fractions 0.04 \
 --checkpoint_file ./pretrained/pdac_stanford_multicoil_8x
 --data_path DATA_DIR
 ```
