@@ -225,8 +225,8 @@ def cli_main(args):
                                                        args.learningrate_callback],
                                             logger=logger,
                                             resume_from_checkpoint=args.resume_from,
-                                            limit_train_batches=5,
-                                            limit_val_batches=5,
+                                            # limit_train_batches=5,
+                                            # limit_val_batches=5,
                                             )
     
     # Save all hyperparameters to .yaml file in the current log dir
