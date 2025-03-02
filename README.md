@@ -76,7 +76,7 @@ python pdac_examples/train_pdac_fastmri.py --config_file pdac_examples/config/fa
 ```
 ### Standford 2D FSE
 ```
-python pdac_examples/train_pdac_stanford.py --config_file pdac_examples/config/stanford/pdac.yaml
+python pdac_examples/train_pdac_stanford.py --config_file pdac_examples/config/stanford2d/pdac.yaml
 ```
 
 ## Evaluation
